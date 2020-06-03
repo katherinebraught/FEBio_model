@@ -8,6 +8,7 @@
 # at each element and time point. Enter the following command in the terminal: 
 # python extract.py FeBIO_Output_File_Name.txt Script_Output_1.txt Script_Output_2.txt
 
+#test git commands
 
 import sys
 import math
