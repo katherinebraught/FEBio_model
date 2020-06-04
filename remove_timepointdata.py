@@ -98,8 +98,12 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 	with open(inputfile) as fd:
 		data = xmltodict.parse(fd.read())
 	fd.close()
-	comp_OUT = open("test.unmod.out", "w") 
+	#save a copy of the xml data before changes
 	xml_data = xmltodict.unparse(data, pretty=True)
+
+	#file for debug only
+	comp_OUT = open("test.unmod.out", "w") 
+	original_xml_data = xmltodict.unparse(data, pretty=True)
 	comp_OUT.write(xml_data)
 	comp_OUT.close()
 	
@@ -125,10 +129,10 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 	new_muc['generation'] = [new_muc['generation'][0].copy(), new_muc['generation'][0].copy()]
 	new_muc['generation'][1]['start_time'] = time
 	new_muc['generation'][0]['start_time'] = '0'
-	#add to dictionary
+	#add new mucosa to dictionary
 	data['febio_spec']['Material']['material'].append(new_muc)
 	
-	
+	found_element = False
 	#look through the <Elements type="hex8" mat="2" name="Mucosa"> and remove each item in elements
 	elements = (data['febio_spec']['Geometry']['Elements'])
 	mucosa = []
@@ -152,6 +156,7 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 	   # print('\n\n')
 	   # print(type(element['@id']))
 		if element['@id'] in elements_to_remove:
+			found_element = True
 			mucosa['elem'].remove(element)
 			new_muc_element['elem'].append(element)
 			
@@ -164,7 +169,9 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 	
 	
 	#write to output file
-	xml_data = xmltodict.unparse(data, pretty=True, short_empty_elements=True)
+	#if we found a new element, update xml data to contain the new data
+	if found_element:
+		xml_data = xmltodict.unparse(data, pretty=True, short_empty_elements=True)
 	OUT.write(xml_data)
 	OUT.close()
 	
@@ -181,7 +188,7 @@ outputfile = sys.argv[3]
 areastrainElementsFile = sys.argv[4]
 FEB_in = sys.argv[5]#"test.in"
 FEB_out = sys.argv[6]#"test.feb"
-TIMEPOINT = sys.argv[7] - 1
+TIMEPOINT = int(sys.argv[7]) - 1
 
 
 threshhold_elements = threshold_and_strain_data(inputfile, input_with_lift, outputfile, areastrainElementsFile)
