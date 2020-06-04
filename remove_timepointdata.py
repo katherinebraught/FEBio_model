@@ -124,7 +124,7 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 	new_name = 'Mucosa' + time
 	new_muc['@name'] = new_name
    #remove extra generations and update start time
-	new_muc['generation'] = [new_muc['generation'][0].copy(), new_muc['generation'][0].copy()]
+	new_muc['generation'] = [new_muc['generation'].copy(), new_muc['generation'].copy()]
 	new_muc['generation'][1]['start_time'] = time
 	new_muc['generation'][0]['start_time'] = '0'
 	#add new mucosa to dictionary
