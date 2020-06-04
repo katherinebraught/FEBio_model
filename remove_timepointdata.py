@@ -38,7 +38,6 @@ def find_strain_values_for_final_timepoint(data_no_lift):
 		else:
 			data = line.split("=")
 			if data[0].strip() == "*Time":
-				print(values)
 				values = []
 	return values
 
