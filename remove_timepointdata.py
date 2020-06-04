@@ -91,6 +91,8 @@ def threshold_and_strain_data(infile, input_with_lift, outfile, threshholdvaluef
 	return threshhold_values
 	
 def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
+	if (len(elements_to_remove)) == 0:
+		return
 	#read input file
 	OUT = open(outputfile, "w") 
 	with open(inputfile) as fd:
@@ -179,7 +181,7 @@ outputfile = sys.argv[3]
 areastrainElementsFile = sys.argv[4]
 FEB_in = sys.argv[5]#"test.in"
 FEB_out = sys.argv[6]#"test.feb"
-TIMEPOINT = sys.argv[7]
+TIMEPOINT = sys.argv[7] - 1
 
 
 threshhold_elements = threshold_and_strain_data(inputfile, input_with_lift, outputfile, areastrainElementsFile)

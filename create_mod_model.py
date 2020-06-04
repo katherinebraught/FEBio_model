@@ -3,13 +3,18 @@ import math
 #pip install xmltodict
 import xmltodict
 
-if len(sys.argv) != 4:
-	print("Error: call program as create_mod_model.py input_feb_file output_feb_file time")
+if len(sys.argv) != 5:
+	print("Error: call program as create_mod_model.py input_feb_file output_feb_file timepoint_file timepoint")
 	exit()
 
 input_feb = sys.argv[1]
 modified_feb = sys.argv[2]
-time = sys.argv[3]
+timepoint_file = sys.argv[3]
+timepoint = sys.argv[4]
+timepoints = open(timepoint_file, "r")
+times = timepoints.read().splitlines()
+time = times[int(timepoint)-1]
+timepoints.close()
 
 with open(input_feb) as fd:
         data = xmltodict.parse(fd.read())
