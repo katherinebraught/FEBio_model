@@ -91,15 +91,13 @@ def threshold_and_strain_data(infile, input_with_lift, outfile, threshholdvaluef
 	return threshhold_values
 	
 def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
-	if (len(elements_to_remove)) == 0:
-		return
 	#read input file
 	OUT = open(outputfile, "w") 
 	with open(inputfile) as fd:
 		data = xmltodict.parse(fd.read())
 	fd.close()
 	#save a copy of the xml data before changes
-	xml_data = xmltodict.unparse(data, pretty=True)
+	xml_data = xmltodict.unparse(data, pretty=True, short_empty_elements=True)
 
 	#file for debug only
 	comp_OUT = open("test.unmod.out", "w") 
