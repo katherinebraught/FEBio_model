@@ -22,11 +22,11 @@ def area_stretch(Ex, Ey):
 	return math.sqrt(2*(Ex)+1) * math.sqrt(2*(Ey)+1) #Set equation for area stretch based on component x and y strains here 
 
 #takes in values as string
-def line_string(time, elnum, Ex, Ey, stretch):
-	return time + "," + elnum + "," + Ex + "," + Ey + "," + stretch + "\n"
+def line_string(time, elnum, Ex, Ey, total_area, growth_area, elastic_stretch):
+	return time + "," + elnum + "," + Ex + "," + Ey + "," + total_area + "," + growth_area + "," + elastic_stretch + "\n"
 
 def headings():
-	return "Time,Element,Ex,Ey,Area_Strain\n"
+	return "Time,Element,Ex,Ey,Total Area Strech,Growth Area Strech,Elastic Area Stretch\n"
   
 def find_strain_values_for_final_timepoint(data_no_lift):
 	values = []
@@ -41,10 +41,11 @@ def find_strain_values_for_final_timepoint(data_no_lift):
 				values = []
 	return values
 
-def threshold_and_strain_data(infile, input_with_lift, outfile, threshholdvaluefile):
+#timepoint and starting_timepoint are 0 indexed
+def threshold_and_strain_data(infile, input_with_lift, outfile, threshholdvaluefile, timepoint, starting_timepoint):
 	INFILE = open(infile, "r")  # open the file specified by the value of arg1, to read from the file.
 	INFILE_WITH_LIFT = open(input_with_lift, "r")  # open the file specified by the value of arg1, to read from the file.
-	OUT = open(outfile, "w")	 # open the file specified by the value of arg2, to write to the file.
+	OUT = open(outfile, "a")	 # open the file specified by the value of arg2, to write to the file.
 	THRESHHOLD_F = open(threshholdvaluefile, "w")
 	
 
@@ -60,14 +61,18 @@ def threshold_and_strain_data(infile, input_with_lift, outfile, threshholdvaluef
 	threshhold_values = []
 	time_list = []
 	found_time = False
-
+	
+	time_index=0
 	growth_strain_index = 0
 	for line in data_no_lift:
 		data = line.split(",")
 		if len(data)> 1:
-			stretch =  area_stretch(float(data[1]), float(data[2])) / growth_strain[growth_strain_index]
+			total_stretch= area_stretch(float(data[1]), float(data[2])) 
+			growth_stretch = growth_strain[growth_strain_index]
+			stretch =  total_stretch / growth_stretch
 			growth_strain_index+=1
-			OUT.write(line_string(str(time), data[0], data[1], data[2],str(stretch)))
+			if time_index >= starting_timepoint and time_index <= timepoint:
+				OUT.write(line_string(str(time), data[0], data[1], data[2],str(total_stretch),str(growth_stretch), str(stretch)))
 			if stretch > THRESHHOLD:
 				THRESHHOLD_F.write(str(time) + "," + data[0] + "\n")
 				time_list.append(data[0])
@@ -78,6 +83,7 @@ def threshold_and_strain_data(infile, input_with_lift, outfile, threshholdvaluef
 				if found_time:
 					threshhold_values.append((time, time_list))
 					time_list = []
+					time_index+=1
 				found_time = True
 				growth_strain_index = 0
 
@@ -86,7 +92,7 @@ def threshold_and_strain_data(infile, input_with_lift, outfile, threshholdvaluef
 	OUT.close()
 	THRESHHOLD_F.close()
 
-	print("Output files written to " + outfile + " and " + threshholdvaluefile)
+	print("Output files written to " + outfile + "with data for timepoints " + str(starting_timepoint+1) + " to " + str(timepoint+1) + " and " + threshholdvaluefile)
 	
 	return threshhold_values
 	
@@ -176,8 +182,8 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 
 	
 
-if len(sys.argv) != 8:
-	print("Error: call program as extract.py strain_values_from_febio strain_values_with_lift outputfile areastrainElementsFile febioInputFile newfebioInputFileName timepoint")
+if len(sys.argv) != 9:
+	print("Error: call program as extract.py strain_values_from_febio strain_values_with_lift outputfile areastrainElementsFile febioInputFile newfebioInputFileName timepoint previous_timepoint")
 	exit()
 
 inputfile = sys.argv[1]
@@ -187,9 +193,10 @@ areastrainElementsFile = sys.argv[4]
 FEB_in = sys.argv[5]#"test.in"
 FEB_out = sys.argv[6]#"test.feb"
 TIMEPOINT = int(sys.argv[7]) - 1
+PREVIOUS_TIMEPOINT = int(sys.argv[8])
 
 
-threshhold_elements = threshold_and_strain_data(inputfile, input_with_lift, outputfile, areastrainElementsFile)
+threshhold_elements = threshold_and_strain_data(inputfile, input_with_lift, outputfile, areastrainElementsFile, TIMEPOINT, PREVIOUS_TIMEPOINT)
 
 #print(threshhold_elements)	  
 
