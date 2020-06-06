@@ -115,6 +115,7 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 	new_materials = []
 	#modify input data
 	#for each part
+	added=0
 	for part in data['febio_spec']['Geometry']['Elements']:
 		#if name has mucosa
 		if 'Mucosa' in part['@name']:
@@ -142,29 +143,31 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 						new_material = mat.copy()
 						old_material = mat
 						
-		
+				
 				#update names
-				new_material['@name'] = new_material['@name'] + time
-				new_part['@name'] = new_part['@name'] + time
+				new_material['@name'] = new_material['@name'] + "-" + time
+				new_part['@name'] = new_part['@name'] + "-" + time
 			
 				#add a generation
 				if type(new_material['generation']) is list:
-					new_material['generation'].append(new_material['generation'][0])
+					new_material['generation'].append(new_material['generation'][0].copy())
 				else:
-					new_material['generation'] = [new_material['generation'], new_material['generation']]
+					new_material['generation'] = [new_material['generation'], new_material['generation'].copy()]
 				
-				new_material['generation'][len(new_material) -1]['start_time'] = time
+				new_material['generation'][len(new_material['generation']) -1]['start_time'] = time
 
 				
 				#if we did not remove all the elements:
 				if len(part['elem']) != 0:
+					print(str(max_id))
 					#append the copy of material and add a generation (check if list or item)
-					new_id = str(max_id + 1)
+					added+=1
+					new_id = str(max_id + added)
 					new_material['@id'] = new_id
 					new_part['@mat'] = new_id
 					
-					new_parts.append(new_part)
-					new_materials.append(new_material)
+					new_parts.append(new_part.copy())
+					new_materials.append(new_material.copy())
 					
 				#if did remove all the elements
 				else:
@@ -173,8 +176,13 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 					part = new_part
 				
 	#update dictionary
-	data['febio_spec']['Material']['material'].append(new_materials)
-	data['febio_spec']['Geometry']['Elements'].append(new_parts)
+	print(new_material)
+	print('\n')
+	print(new_parts)
+	for mat in new_materials:
+		data['febio_spec']['Material']['material'].append(mat)
+	for part in new_parts:
+		data['febio_spec']['Geometry']['Elements'].append(part)
 	
 	
 	#write to output file
@@ -185,7 +193,7 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 	
 
 if len(sys.argv) != 9:
-	print("Error: call program as extract.py strain_values_from_febio strain_values_with_lift outputfile areastrainElementsFile febioInputFile newfebioInputFileName timepoint previous_timepoint")
+	print("Error: call program as extract.py strain_values_from_febio strain_values_with_lift outputfile threshhold_elements febioInputFile newfebioInputFileName timepoint previous_timepoint")
 	exit()
 
 inputfile = sys.argv[1]
@@ -198,8 +206,8 @@ TIMEPOINT = int(sys.argv[7]) - 1
 PREVIOUS_TIMEPOINT = int(sys.argv[8])
 
 
-threshhold_elements = threshold_and_strain_data(inputfile, input_with_lift, outputfile, areastrainElementsFile, TIMEPOINT, PREVIOUS_TIMEPOINT)
+threshhold_elements = threshold_and_strain_data(inputfile, input_with_lift, outputfile, areastrainElementsFile+sys.argv[7], TIMEPOINT, PREVIOUS_TIMEPOINT)
 
-#print(threshhold_elements)	  
+print(threshhold_elements)	  
 
 export_new_FEB_file(FEB_in, FEB_out, threshhold_elements[int(TIMEPOINT)][1], str(threshhold_elements[int(TIMEPOINT)][0]))
