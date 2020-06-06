@@ -79,11 +79,11 @@ def threshold_and_strain_data(infile, input_with_lift, outfile, threshholdvaluef
 		else:
 			data = line.split("=")
 			if data[0].strip() == "*Time":
-				time = float(data[1].strip())
 				if found_time:
 					threshhold_values.append((time, time_list))
 					time_list = []
 					time_index+=1
+				time = float(data[1].strip())
 				found_time = True
 				growth_strain_index = 0
 
