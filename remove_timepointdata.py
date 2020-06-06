@@ -111,75 +111,77 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 	comp_OUT.write(xml_data)
 	comp_OUT.close()
 	
+	new_parts = []
+	new_materials = []
 	#modify input data
-	
-	#make new material
-	materials = data['febio_spec']['Material']['material']
-	#copy mucosa
-	new_muc = {}#materials['Mucosa']
-	max_id = 0
-	for mat in materials:
-		if int(mat['@id']) > max_id:
-			max_id = int(mat['@id'])
-		if mat['@name'] == 'Mucosa':
-			new_muc = mat.copy()
-	#update id - check num of materials and add 1
-	new_id = str(max_id + 1)
-	new_muc['@id'] = new_id
-	#update name "Mucosa+timepoint"
-	new_name = 'Mucosa' + time
-	new_muc['@name'] = new_name
-   #remove extra generations and update start time
-	new_muc['generation'] = [new_muc['generation'].copy(), new_muc['generation'].copy()]
-	new_muc['generation'][1]['start_time'] = time
-	new_muc['generation'][0]['start_time'] = '0'
-	#add new mucosa to dictionary
-	data['febio_spec']['Material']['material'].append(new_muc)
-	
-	found_element = False
-	#look through the <Elements type="hex8" mat="2" name="Mucosa"> and remove each item in elements
-	elements = (data['febio_spec']['Geometry']['Elements'])
-	mucosa = []
-	new_elements = elements
-	new_muc_element = {}
-	for element in elements:
-		if element['@name'] == 'Mucosa':
-			mucosa = element
-			elements.remove(element)
-			new_muc_element = element.copy()
-	
-	#make new element
-	new_muc_element['@mat'] = new_id
-	new_muc_element['@name'] = "el_" + new_name
-	new_muc_element['elem'] = []
-	
-	#remove elements elements to remove
-	for element in mucosa['elem']:
-	   # print(type(element))
-	   # print((element))
-	   # print('\n\n')
-	   # print(type(element['@id']))
-		if element['@id'] in elements_to_remove:
-			found_element = True
-			mucosa['elem'].remove(element)
-			new_muc_element['elem'].append(element)
+	#for each part
+	for part in data['febio_spec']['Geometry']['Elements']:
+		#if name has mucosa
+		if 'Mucosa' in part['@name']:
+			new_part = part.copy()
+			new_part['elem'] = []
+			removed_element = False
+			#remove all the elements from the part and the elements to remove
+			for element in part['elem']:
+				if element['@id'] in elements_to_remove:
+					removed_element = True
+					part['elem'].remove(element)
+					elements_to_remove.remove(element['@id'])
+					new_part['elem'].append(element)
+					
+			#if we removed anything
+			if removed_element:
+				#finish seting up the new material and part
+				new_material = {}
+				old_material = {}
+				max_id = 0
+				for mat in data['febio_spec']['Material']['material']:
+					if int(mat['@id']) > max_id:
+						max_id = int(mat['@id'])
+					if mat['@name'] == 'Mucosa':
+						new_material = mat.copy()
+						old_material = mat
+						
+		
+				#update names
+				new_material['@name'] = new_material['@name'] + time
+				new_part['@name'] = new_part['@name'] + time
 			
-			
+				#add a generation
+				if type(new_material['generation']) is list:
+					new_material['generation'].append(new_material['generation'][0])
+				else:
+					new_material['generation'] = [new_material['generation'], new_material['generation']]
+				
+				new_material['generation'][len(new_material) -1]['start_time'] = time
+
+				
+				#if we did not remove all the elements:
+				if len(part['elem']) != 0:
+					#append the copy of material and add a generation (check if list or item)
+					new_id = str(max_id + 1)
+					new_material['@id'] = new_id
+					new_part['@mat'] = new_id
+					
+					new_parts.append(new_part)
+					new_materials.append(new_material)
+					
+				#if did remove all the elements
+				else:
+					#set the old material and element as the new material/generation
+					old_material = new_material
+					part = new_part
+				
 	#update dictionary
-	new_elements.append(mucosa)
-	new_elements.append(new_muc_element)
-	data['febio_spec']['Geometry']['Elements'] = new_elements
-	
+	data['febio_spec']['Material']['material'].append(new_materials)
+	data['febio_spec']['Geometry']['Elements'].append(new_parts)
 	
 	
 	#write to output file
-	#if we found a new element, update xml data to contain the new data
-	if found_element:
-		xml_data = xmltodict.unparse(data, pretty=True, short_empty_elements=True)
+	xml_data = xmltodict.unparse(data, pretty=True, short_empty_elements=True)
 	OUT.write(xml_data)
 	OUT.close()
 	
-
 	
 
 if len(sys.argv) != 9:
