@@ -16,7 +16,7 @@ import math
 import xmltodict
 import collections 
 
-THRESHHOLD = 1.1 #Set area stretch threshold here 
+THRESHHOLD = 1.21 #Set area stretch threshold here 
 
 #takes in values as float
 def area_stretch(Ex, Ey):
@@ -165,9 +165,7 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 
 				
 				#if we did not remove all the elements:
-				print(part['elem'])
 				if len(part['elem']) != 0:
-					print(str(max_id))
 					#append the copy of material and add a generation (check if list or item)
 					added+=1
 					new_id = str(max_id + added)
@@ -176,11 +174,6 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 					
 				#if did remove all the elements
 				else:
-					print("in a case where we removed everything\n")
-					print(part)
-					print('\n')
-					print(new_part)
-					print('\n')
 					#set the old material and element as the new material/generation
 					data['febio_spec']['Material']['material'].remove(old_material)
 					data['febio_spec']['Geometry']['Elements'].remove(part)
