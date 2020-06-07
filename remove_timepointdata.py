@@ -16,7 +16,7 @@ import math
 import xmltodict
 import collections 
 
-THRESHHOLD = 1.21 #Set area stretch threshold here 
+THRESHHOLD = 1.1 #Set area stretch threshold here 
 
 #takes in values as float
 def area_stretch(Ex, Ey):
@@ -191,7 +191,16 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 				
 	#update dictionary
 	for mat in new_materials:
-		data['febio_spec']['Material']['material'].append(mat)
+		#add it in order:
+		temp_materials = data['febio_spec']['Material']['material']
+		appended = False
+		for i in range(0, len(temp_materials)):
+			if int(temp_materials[i]['@id']) > int(mat['@id']): #+ 1 == mat['@id']:
+				data['febio_spec']['Material']['material'].insert(i,mat)
+				appended = True
+				break
+		if not appended:
+			data['febio_spec']['Material']['material'].append(mat)
 	for part in new_parts:
 		data['febio_spec']['Geometry']['Elements'].append(part)
 	
