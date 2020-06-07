@@ -118,18 +118,20 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 	#modify input data
 	#for each part
 	added=0
-	for part in data['febio_spec']['Geometry']['Elements']:
+	temp_parts = data['febio_spec']['Geometry']['Elements']
+	for part in temp_parts:
 		#if name has mucosa
 		if 'Mucosa' in part['@name']:
 			new_part = part.copy()
 			new_part['elem'] = []
 			removed_element = False
 			#remove all the elements from the part and the elements to remove
-			for element in part['elem']:
+			temp_el_list = part['elem'].copy()
+			for element in temp_el_list:
 				if element['@id'] in elements_to_remove:
 					removed_element = True
 					part['elem'].remove(element)
-					elements_to_remove.remove(element['@id'])
+					#elements_to_remove.remove(element['@id'])
 					new_part['elem'].append(element)
 					
 			#if we removed anything
@@ -163,6 +165,7 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 
 				
 				#if we did not remove all the elements:
+				print(part['elem'])
 				if len(part['elem']) != 0:
 					print(str(max_id))
 					#append the copy of material and add a generation (check if list or item)
@@ -171,14 +174,20 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 					new_material['@id'] = new_id
 					new_part['@mat'] = new_id
 					
-					new_parts.append(new_part.copy())
-					new_materials.append(new_material.copy())
-					
 				#if did remove all the elements
 				else:
+					print("in a case where we removed everything\n")
+					print(part)
+					print('\n')
+					print(new_part)
+					print('\n')
 					#set the old material and element as the new material/generation
-					old_material = new_material
-					part = new_part
+					data['febio_spec']['Material']['material'].remove(old_material)
+					data['febio_spec']['Geometry']['Elements'].remove(part)
+					
+				new_parts.append(new_part.copy())
+				new_materials.append(new_material.copy())
+					
 				
 	#update dictionary
 	for mat in new_materials:
