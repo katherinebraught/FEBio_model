@@ -12,7 +12,7 @@ lifted_input=lift_$inputfile
 modified_strain_values=mod_$febioOut
 temp_input=temp_$inputfile
 final_model=new_model_$inputfile
-strain_values_output=strain_values_output
+strain_values_output=strain_values_output.csv
 prev_time=0
 
 #clear strain_values_output so we can append to new file
@@ -27,7 +27,7 @@ python find_timepoints.py $febioOut $timepoints_data
 cp $inputfile $temp_input
 #for loop goes here
 
-for timepoint in 7 10 14
+for timepoint in 7 8 9 10 11
 do
 #generate a model with lift from original inputfile
 python create_mod_model.py $temp_input $lifted_input $timepoints_data $timepoint
@@ -35,7 +35,7 @@ python create_mod_model.py $temp_input $lifted_input $timepoints_data $timepoint
 FEBio3 -i $lifted_input > febio_lifted_output_t$timepoint
 
 echo removing time point $timepoint
-python remove_timepointdata.py $febioOut $modified_strain_values $strain_values_output.csv threashold_values_output $temp_input $final_model $timepoint $prev_time
+python remove_timepointdata.py $febioOut $modified_strain_values $strain_values_output threashold_values_output $temp_input $final_model $timepoint $prev_time
 FEBio3 -i $final_model > febio_output_t$timepoint
 cp $final_model $temp_input
 prev_time=$timepoint
