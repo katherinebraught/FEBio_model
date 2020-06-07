@@ -14,6 +14,7 @@ import sys
 import math
 #pip install xmltodict
 import xmltodict
+import collections 
 
 THRESHHOLD = 1.21 #Set area stretch threshold here 
 
@@ -86,7 +87,8 @@ def threshold_and_strain_data(infile, input_with_lift, outfile, threshholdvaluef
 				time = float(data[1].strip())
 				found_time = True
 				growth_strain_index = 0
-
+	#append final timepoint
+	threshhold_values.append((time, time_list))
 
 	INFILE.close()
 	OUT.close()
@@ -139,7 +141,7 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 				for mat in data['febio_spec']['Material']['material']:
 					if int(mat['@id']) > max_id:
 						max_id = int(mat['@id'])
-					if mat['@name'] == 'Mucosa':
+					if mat['@name'] == part['@name']:
 						new_material = mat.copy()
 						old_material = mat
 						
@@ -149,12 +151,15 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 				new_part['@name'] = new_part['@name'] + "-" + time
 			
 				#add a generation
-				if type(new_material['generation']) is list:
+				#print("pre condition: adding generation to existing generation " + new_material['generation'] + '\n')
+				new_material['generation'] = new_material['generation'].copy()
+				if isinstance(new_material['generation'],list):
 					new_material['generation'].append(new_material['generation'][0].copy())
 				else:
 					new_material['generation'] = [new_material['generation'], new_material['generation'].copy()]
 				
 				new_material['generation'][len(new_material['generation']) -1]['start_time'] = time
+				#print("post: added generation to existing generation " + new_material['generation'] + '\n')
 
 				
 				#if we did not remove all the elements:
@@ -176,9 +181,6 @@ def export_new_FEB_file(inputfile, outputfile, elements_to_remove, time):
 					part = new_part
 				
 	#update dictionary
-	print(new_material)
-	print('\n')
-	print(new_parts)
 	for mat in new_materials:
 		data['febio_spec']['Material']['material'].append(mat)
 	for part in new_parts:
