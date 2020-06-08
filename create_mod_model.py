@@ -32,8 +32,10 @@ data['febio_spec']['LoadData']['loadcurve']['point'][1] = new_point
 
 point = data['febio_spec']['LoadData']['loadcurve']['point'][2]
 point = point.split(',')
-x = point[0]
-new_point = x + "," + str(new_y + new_y*0.01)
+#x = point[0]
+x = float(1.1)*float(time)
+y_zero = float(0)
+new_point = str(x) + "," + str(y_zero)
 
 data['febio_spec']['LoadData']['loadcurve']['point'][2] = new_point
 
