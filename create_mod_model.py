@@ -26,9 +26,10 @@ point = point.split(',')
 x = float(point[0])
 y = float(point[1])
 new_y = y/x * float(time)
-new_point = time + "," + str(new_y)
 
-data['febio_spec']['LoadData']['loadcurve']['point'][1] = new_point
+if new_y > y: 
+    new_point = time + "," + str(new_y)
+    data['febio_spec']['LoadData']['loadcurve']['point'][1] = new_point
 
 point = data['febio_spec']['LoadData']['loadcurve']['point'][2]
 point = point.split(',')
