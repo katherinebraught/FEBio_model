@@ -45,15 +45,15 @@ def find_strain_values_for_final_timepoint(data_no_lift):
 #timepoint and starting_timepoint are 0 indexed
 def threshold_and_strain_data(infile, input_with_lift, outfile, threshholdvaluefile, timepoint, starting_timepoint):
 	INFILE = open(infile, "r")  # open the file specified by the value of arg1, to read from the file.
-	INFILE_WITH_LIFT = open(input_with_lift, "r")  # open the file specified by the value of arg1, to read from the file.
+	#INFILE_WITH_LIFT = open(input_with_lift, "r")  # open the file specified by the value of arg1, to read from the file.
 	OUT = open(outfile, "a")	 # open the file specified by the value of arg2, to write to the file.
 	THRESHHOLD_F = open(threshholdvaluefile, "w")
 	
 
 	# Read data
 	data_no_lift = INFILE.read().splitlines()
-	data_with_lift = INFILE_WITH_LIFT.read().splitlines()
-	growth_strain = find_strain_values_for_final_timepoint(data_with_lift)
+	#data_with_lift = INFILE_WITH_LIFT.read().splitlines()
+	growth_strain = find_strain_values_for_final_timepoint(data_no_lift)
 	time = 0
 
 	##add headings

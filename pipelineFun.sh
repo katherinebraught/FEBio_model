@@ -27,12 +27,12 @@ python find_timepoints.py $febioOut $timepoints_data
 cp $inputfile $temp_input
 #for loop goes here
 
-for timepoint in 3000 6000 9000
+for timepoint in 5 15 21
 do
 #generate a model with lift from original inputfile
-python create_mod_model.py $temp_input $lifted_input $timepoints_data $timepoint
+#python create_mod_model.py $temp_input $lifted_input $timepoints_data $timepoint
 #generate strain_data for modified file:
-FEBio2 -i $lifted_input > febio_lifted_output_t$timepoint
+#FEBio2 -i $lifted_input > febio_lifted_output_t$timepoint
 
 echo removing time point $timepoint
 python remove_timepointdata.py $febioOut $modified_strain_values $strain_values_output threashold_values_output $temp_input $final_model $timepoint $prev_time
